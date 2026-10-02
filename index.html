@@ -3,80 +3,100 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>心拍カウント課題（HCT）</title>
+<meta name="robots" content="noindex,nofollow">
+<title>心拍カウント課題</title>
 <style>
-  :root {
-    --bg: #f7f7f8;
-    --card: #ffffff;
-    --text: #1a1a1a;
-    --sub: #6b7280;
-    --accent: #2563eb;
-    --border: #e5e7eb;
-  }
+  :root { --bg:#f7f7f8; --card:#fff; --text:#1a1a1a; --sub:#6b7280; --accent:#2563eb; --border:#e5e7eb; }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #111214; --card: #1c1d20; --text: #f2f2f2; --sub: #9ca3af; --border: #2d2f33;
-    }
+    :root:not([data-theme="light"]) { --bg:#111214; --card:#1c1d20; --text:#f2f2f2; --sub:#9ca3af; --border:#2d2f33; }
   }
-  :root[data-theme="dark"] { --bg: #111214; --card: #1c1d20; --text: #f2f2f2; --sub: #9ca3af; --border: #2d2f33; }
-  * { box-sizing: border-box; }
+  :root[data-theme="dark"] { --bg:#111214; --card:#1c1d20; --text:#f2f2f2; --sub:#9ca3af; --border:#2d2f33; }
+  * { box-sizing:border-box; }
   html { scroll-padding-top: env(safe-area-inset-top, 0px); }
-  body {
-    margin: 0; background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Hiragino Sans, "Noto Sans JP", sans-serif;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-    min-height: 100%;
-  }
-  html, body { height: 100%; }
-  .wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; min-height: 100%; display: flex; flex-direction: column; }
-  .screen { display: none; flex: 1; flex-direction: column; }
-  .screen.active { display: flex; }
-  h1 { font-size: 1.1rem; margin: 4px 0 14px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
-  p.inst { line-height: 1.9; font-size: 0.95rem; margin: 0 0 14px; }
-  .warn-box {
-    background: #fef2f2; border: 1px solid #fecaca; color: #991b1b;
-    border-radius: 10px; padding: 12px 14px; font-weight: 700; font-size: 0.92rem; line-height: 1.7; margin-bottom: 14px;
-  }
-  :root:not([data-theme="light"]) .warn-box { background: #3f1d1d; border-color: #7f1d1d; color: #fca5a5; }
-  button {
-    width: 100%; padding: 15px 10px; border-radius: 12px; border: none;
-    background: var(--accent); color: white; font-size: 1rem; font-weight: 700; cursor: pointer; margin-top: 8px;
-  }
-  button:disabled { opacity: 0.4; }
-  button.secondary { background: transparent; border: 1px solid var(--border); color: var(--text); }
-  .center-flex { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .fixation { font-size: 3rem; color: var(--sub); user-select: none; }
-  .trial-label { text-align: center; color: var(--sub); font-size: 0.85rem; margin-bottom: 6px; }
-  input[type=number] {
-    width: 100%; padding: 14px; font-size: 1.4rem; text-align: center; border-radius: 10px;
-    border: 1px solid var(--border); background: var(--bg); color: var(--text); margin-bottom: 10px;
-  }
-  input[type=range] { width: 100%; margin: 18px 0 6px; }
-  .slider-labels { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--sub); }
-  .slider-val { text-align: center; font-size: 1.6rem; font-weight: 700; margin-bottom: 4px; }
-  .finger-indicator {
-    display: flex; align-items: center; gap: 12px; padding: 16px; border-radius: 12px; margin-bottom: 14px;
-    background: #6b7280; transition: background-color 0.25s ease;
-  }
-  .finger-indicator.state-settling { background: #d97706; }
-  .finger-indicator.state-measuring-poor { background: #dc2626; }
-  .finger-indicator.state-measuring-good { background: #16a34a; }
-  .finger-icon { font-size: 2rem; line-height: 1; }
-  .finger-text { color: white; font-weight: 700; font-size: 0.9rem; }
-  #ppg-container { display: none; }
-  table.results { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-  table.results th, table.results td { border: 1px solid var(--border); padding: 6px 8px; text-align: center; }
-  .note { font-size: 0.78rem; color: var(--sub); line-height: 1.5; margin-top: 10px; }
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+  .wrap { max-width:480px; margin:0 auto; padding:20px 16px 40px; min-height:100%; display:flex; flex-direction:column; }
+  .screen { display:none; flex:1; flex-direction:column; }
+  .screen.active { display:flex; }
+  h1 { font-size:1.1rem; margin:4px 0 14px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:14px; }
+  p.inst { line-height:1.9; font-size:.95rem; margin:0 0 14px; }
+  .warn-box { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:12px 14px;
+    font-weight:700; font-size:.92rem; line-height:1.7; margin-bottom:14px; }
+  :root:not([data-theme="light"]) .warn-box { background:#3f1d1d; border-color:#7f1d1d; color:#fca5a5; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .warn-box { background:#fef2f2; border-color:#fecaca; color:#991b1b; } }
+  .info-box { background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; border-radius:10px; padding:12px 14px; font-size:.88rem; line-height:1.7; margin-bottom:14px; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .info-box { background:#1e2a44; border-color:#334e7a; color:#bfdbfe; } }
+  button { width:100%; padding:15px 10px; border-radius:12px; border:none; background:var(--accent); color:#fff;
+    font-size:1rem; font-weight:700; cursor:pointer; margin-top:8px; }
+  button:disabled { opacity:.4; }
+  button.secondary { background:transparent; border:1px solid var(--border); color:var(--text); }
+  .center-flex { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .fixation { font-size:3rem; color:var(--sub); user-select:none; }
+  .trial-label { text-align:center; color:var(--sub); font-size:.85rem; margin-bottom:6px; }
+  input[type=number], input[type=text] { width:100%; padding:14px; font-size:1.2rem; border-radius:10px;
+    border:1px solid var(--border); background:var(--bg); color:var(--text); margin-bottom:10px; }
+  input[type=number] { text-align:center; font-size:1.4rem; }
+  input[type=range] { width:100%; margin:18px 0 6px; }
+  .slider-labels { display:flex; justify-content:space-between; font-size:.78rem; color:var(--sub); }
+  .slider-val { text-align:center; font-size:1.6rem; font-weight:700; margin-bottom:4px; }
+  label.opt { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:.95rem; line-height:1.5; }
+  label.opt input { width:20px; height:20px; flex:none; }
+  .q { font-weight:700; font-size:.92rem; margin:14px 0 4px; }
+  .fi { display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; margin-bottom:14px; background:#6b7280; transition:background-color .25s ease; }
+  .fi.s-settling { background:#d97706; } .fi.s-poor { background:#dc2626; } .fi.s-good { background:#16a34a; }
+  .fi-icon { font-size:1.8rem; line-height:1; } .fi-text { color:#fff; font-weight:700; font-size:.9rem; line-height:1.5; }
+  table.results { width:100%; border-collapse:collapse; font-size:.78rem; }
+  table.results th, table.results td { border:1px solid var(--border); padding:5px 4px; text-align:center; }
+  .note { font-size:.78rem; color:var(--sub); line-height:1.5; margin-top:10px; }
+  .hold { font-size:.85rem; font-weight:700; text-align:center; margin-bottom:10px; color:#b45309; }
+  #ppgVideo { position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; left:0; top:0; }
 </style>
 </head>
 <body>
+<video id="ppgVideo" playsinline muted autoplay></video>
 <div class="wrap">
 
-  <!-- 画面1: 教示 -->
-  <div class="screen active" id="screen-intro">
+  <!-- 0: 説明・同意 -->
+  <div class="screen active" id="screen-consent">
     <h1>心拍カウント課題</h1>
+    <div id="inAppWarn" class="warn-box" style="display:none"></div>
+    <div id="insecureWarn" class="warn-box" style="display:none">このページはHTTPSで開く必要があります。研究者に連絡してください。</div>
+    <div class="card" id="consentBody"></div>
+    <div class="card">
+      <div class="q" style="margin-top:0">参加者ID</div>
+      <input type="text" id="pidInput" placeholder="研究者から伝えられたID" autocomplete="off">
+      <label class="opt"><input type="checkbox" id="consentCheck"> 上記の内容を読み、理解したうえで参加に同意します。</label>
+    </div>
+    <button id="consentBtn" disabled>同意して次へ</button>
+  </div>
+
+  <!-- 1: 事前質問 -->
+  <div class="screen" id="screen-pre">
+    <h1>はじめに、いくつか質問です</h1>
+    <div class="card">
+      <div class="q" style="margin-top:0">いまの姿勢</div>
+      <label class="opt"><input type="radio" name="posture" value="seated"> 椅子などに座っている</label>
+      <label class="opt"><input type="radio" name="posture" value="lying"> 横になっている</label>
+      <label class="opt"><input type="radio" name="posture" value="other"> その他</label>
+      <div class="q">直近2時間以内のカフェイン（コーヒー・お茶・エナジードリンク等）</div>
+      <label class="opt"><input type="radio" name="caffeine" value="yes"> 摂取した</label>
+      <label class="opt"><input type="radio" name="caffeine" value="no"> 摂取していない</label>
+      <div class="q">直近1時間以内の運動（階段の昇り降りなど軽いものも含む）</div>
+      <label class="opt"><input type="radio" name="exercise" value="yes"> した</label>
+      <label class="opt"><input type="radio" name="exercise" value="no"> していない</label>
+      <div class="q">周囲の環境</div>
+      <label class="opt"><input type="radio" name="quiet" value="quiet"> 静かで落ち着いている</label>
+      <label class="opt"><input type="radio" name="quiet" value="noisy"> 騒がしい／人の出入りがある</label>
+    </div>
+    <button id="preBtn" disabled>次へ</button>
+  </div>
+
+  <!-- 2: 教示 -->
+  <div class="screen" id="screen-intro">
+    <h1>課題の説明</h1>
     <div class="card">
       <p class="inst">これから、あなたの心臓の鼓動（心拍）を数える課題を行います。<br><br>
       合図が出たら、画面の点を見つめたまま、ご自分の心拍を心の中で数えてください。「1」から数え始め、声には出さず、指などで数えたりもせず、静かに心の中だけでカウントしてください。<br><br>
@@ -85,57 +105,57 @@
         ⚠️ 手首や首などに触れて脈を測ったり、時計や時間の表示を見たりしないでください。<br>
         ご自身が「本当に感じた」心拍の感覚だけを頼りに数えてください。
       </div>
-      <p class="inst" style="margin-bottom:0;">まず練習を1回行ってから、本番を3回行います。</p>
+      <p class="inst">開始と終了は、<b>音</b>と<b>画面の変化</b>でお知らせします。音量を上げてください。</p>
+      <button class="secondary" id="soundTestBtn" style="margin-top:0">音を確認する</button>
+      <p class="inst" style="margin:14px 0 0;">まず練習を1回行ってから、本番を3回行います。</p>
     </div>
-    <button id="toFingerBtn">準備ができたら次へ</button>
+    <button id="toFingerBtn">次へ</button>
   </div>
 
-  <!-- 画面2: 指の設置確認 -->
+  <!-- 3: 指の設置 -->
   <div class="screen" id="screen-finger">
     <h1>センサーの準備</h1>
     <div class="card">
-      <p class="inst">スマートフォン背面のカメラとフラッシュ（ライト）を、指でまとめて覆ってください。軽く触れる程度で構いません。</p>
-      <div id="fingerIndicator" class="finger-indicator">
-        <div id="fingerIcon" class="finger-icon">👆</div>
-        <div id="fingerText" class="finger-text">指をカメラとフラッシュに当ててください</div>
-      </div>
-      <div id="ppg-container"></div>
+      <p class="inst">片手でスマートフォンを持ち、<b>背面のカメラとライト</b>を指の腹でまとめて覆ってください。<b>軽く触れる程度</b>で構いません。強く押しすぎないでください。<br>
+      課題中は、指を当てたまま、もう一方の手で回答を入力します。</p>
+      <div class="fi" data-fi><div class="fi-icon">👆</div><div class="fi-text">カメラを起動しています…</div></div>
     </div>
     <button id="toTrialBtn" disabled>信号が安定したら次へ</button>
   </div>
 
-  <!-- 画面3: 試行前の案内 -->
+  <!-- 4: 試行前 -->
   <div class="screen" id="screen-trial-ready">
     <div class="center-flex">
       <div class="trial-label" id="trialReadyLabel"></div>
-      <div class="card" style="text-align:center;">
+      <div class="card" style="text-align:center; width:100%;">
         <p class="inst" id="trialReadyText" style="margin-bottom:0;"></p>
       </div>
-      <button id="startTrialBtn">開始する</button>
+      <div class="fi" data-fi style="width:100%"><div class="fi-icon">👆</div><div class="fi-text"></div></div>
+      <button id="startTrialBtn" disabled>開始する</button>
     </div>
   </div>
 
-  <!-- 画面4: カウント中（時計等の手がかりは一切表示しない） -->
+  <!-- 5: カウント中（手がかりは表示しない） -->
   <div class="screen" id="screen-counting">
-    <div class="center-flex">
-      <div class="fixation">●</div>
-    </div>
+    <div class="center-flex"><div class="fixation">●</div></div>
   </div>
 
-  <!-- 画面5: 回答入力 -->
+  <!-- 6: 回答 -->
   <div class="screen" id="screen-response">
     <div class="center-flex" style="justify-content:flex-start; padding-top:30px;">
+      <div class="hold" id="holdNote"></div>
       <div class="card" style="width:100%;">
         <p class="inst">何回、心拍を感じましたか？</p>
-        <input type="number" id="countInput" inputmode="numeric" min="0" placeholder="回数を入力">
+        <input type="number" id="countInput" inputmode="numeric" min="0" max="300" placeholder="回数を入力">
         <button id="submitCountBtn">次へ</button>
       </div>
     </div>
   </div>
 
-  <!-- 画面6: 信頼度評定 -->
+  <!-- 7: 信頼度 -->
   <div class="screen" id="screen-confidence">
     <div class="center-flex" style="justify-content:flex-start; padding-top:30px;">
+      <div class="hold" id="holdNote2"></div>
       <div class="card" style="width:100%;">
         <p class="inst">その回答に、どれくらい自信がありますか？</p>
         <div class="slider-val" id="confVal">50</div>
@@ -146,180 +166,364 @@
     </div>
   </div>
 
-  <!-- 画面7: 結果 -->
-  <div class="screen" id="screen-results">
-    <h1>結果</h1>
+  <!-- 8: 事後質問 -->
+  <div class="screen" id="screen-post">
+    <h1>最後に質問です</h1>
     <div class="card">
-      <table class="results" id="resultsTable"></table>
-      <div class="note" id="overallAccuracy"></div>
+      <p class="inst" style="margin-bottom:6px">課題中に行ったことをすべて選んでください。正直にお答えください（回答によって不利益はありません）。</p>
+      <label class="opt"><input type="checkbox" name="strategy" value="pulse_touch"> 手首・首などで脈に触れた</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="clock"> 時計や時間表示を見た</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="count_seconds"> 「1,2,3…」と秒数を数えた</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="estimate_rate"> 自分の普段の心拍数から回数を見積もった</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="interrupted"> 途中で邪魔が入った（音・人・通知など）</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="none"> 上記のいずれもない</label>
+      <div class="q">普段の安静時の心拍数は、1分間に何回くらいだと思いますか？（わからなければ空欄で構いません）</div>
+      <input type="number" id="hrGuess" inputmode="numeric" min="20" max="250" placeholder="回/分">
     </div>
-    <div class="note">
-      ※「実測」は、計測した心拍データのうち、各試行の時間内に検出された拍動数です。この機能はppg-jsによる簡易測定であり、臨床的な妥当性検証を経たものではありません。デバッグ用に生データも保存されています。
+    <button id="postBtn">完了する</button>
+  </div>
+
+  <!-- 9: 保存中 -->
+  <div class="screen" id="screen-saving">
+    <div class="center-flex"><p class="inst" style="text-align:center">データを処理しています…<br>そのままお待ちください。</p></div>
+  </div>
+
+  <!-- 10: 終了 -->
+  <div class="screen" id="screen-done">
+    <h1>ご協力ありがとうございました</h1>
+    <div class="card">
+      <p class="inst" id="doneMsg"></p>
+      <button id="resendBtn" style="display:none">もう一度送信する</button>
+      <button id="downloadBtn" class="secondary">データをファイルとして保存する</button>
+    </div>
+    <div class="card" id="debugCard" style="display:none">
+      <table class="results" id="resultsTable"></table>
+      <div class="note" id="debugNote"></div>
     </div>
   </div>
 
 </div>
 
+<!-- ★本番前に必ず版を固定すること（例: @sontakey/ppg-js@x.y.z）。固定しないと収集中にライブラリが更新される可能性がある -->
 <script src="https://cdn.jsdelivr.net/npm/@sontakey/ppg-js/dist/index.global.js"></script>
 <script>
-  // ===== 試行設計：1回目=練習30秒、2〜4回目=本番 25秒/35秒/45秒 =====
-  const TRIALS = [
-    { label: '練習試行', seconds: 30, practice: true },
+/* ===================== 設定 ===================== */
+const CONFIG = {
+  APP_VERSION: 'hct-web 1.0.0-draft',
+  TRIALS: [
+    { label: '練習試行',   seconds: 30, practice: true  },
     { label: '本番 1回目', seconds: 25, practice: false },
     { label: '本番 2回目', seconds: 35, practice: false },
     { label: '本番 3回目', seconds: 45, practice: false }
-  ];
+  ],
+  POST_TRIAL_WAIT_SEC: 8,     // 終了後、指を当て続けてもらう秒数（拍動検出が窓単位で遅れるため）
+  WINDOW_SEC: 5,              // ライブラリの解析窓（既定5秒）
+  ENDPOINT_URL: '',           // データ送信先（空なら保存ボタンのみ）。Google Apps Script等のURLを入れる
+  CONSENT_HTML: '<p class="inst"><b>【研究参加についての説明】</b><br>（ここに、倫理審査で承認された説明文を貼り付けてください）</p>'
+};
+const QS = new URLSearchParams(location.search);
+const MODE = QS.get('mode') === 'lab' ? 'lab' : 'home';
+const INCLUDE_RAW = QS.get('raw') === '1' || MODE === 'lab';
+const DEBUG = QS.get('debug') === '1';
 
-  let ppg = null;
-  let currentTrialIndex = 0;
-  let sessionStartMs = null;
-  let trialWindows = []; // {startMs, endMs} relative to sessionStartMs, per trial
-  let responses = []; // {count, confidence}
+/* ===================== 純関数（テスト対象） ===================== */
+//<PURE>
+function mean(a) { return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null; }
+function schandry(rec, rep) { return rec > 0 ? 1 - Math.abs(rec - rep) / rec : null; }
+function altScore(rec, rep) { return (rec + rep) > 0 ? 1 - Math.abs(rec - rep) / ((rec + rep) / 2) : null; }
 
-  function show(id) {
-    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
+// events: ppg.getDebugLog().events（t は performance.now() 基準のms）
+// windows: ppg.getDebugLog().windows（t は ppg開始基準の秒＝解析窓の終端）
+// tacho: ppg.getTachogram()（t は ppg開始基準の秒）
+// baseMs: ppg.startTimestampSec*1000（ppg時刻0に対応する performance.now() のms）
+function computeTrialMetrics(events, windows, tacho, baseMs, startMs, endMs, windowSec) {
+  const inWin = ms => ms >= startMs && ms < endMs;
+  const nAll = events.filter(e => e.type === 'peak' && inWin(e.t)).length;
+  const ibis = tacho.filter(b => b.valid && inWin(baseMs + b.t * 1000));
+  const nValid = ibis.length;
+  const nValidGood = ibis.filter(b => b.good).length;
+  const meanIbiMs = ibis.length >= 3 ? mean(ibis.map(b => b.ibiMs)) : null;
+  const seconds = (endMs - startMs) / 1000;
+  const nFromMeanIbi = meanIbiMs ? seconds * 1000 / meanIbiMs : null;
+  const transitions = events
+    .filter(e => e.type === 'state_transition' && inWin(e.t))
+    .map(e => ({ tRelSec: (e.t - startMs) / 1000, state: e.state, reason: e.reason }));
+  let tot = 0, good = 0;
+  for (const w of windows) {
+    const wEnd = baseMs + w.t * 1000, wStart = wEnd - windowSec * 1000;
+    const ov = Math.min(wEnd, endMs) - Math.max(wStart, startMs);
+    if (ov > 0) { tot += ov; if (w.good) good += ov; }
   }
+  return {
+    seconds, counts: { allPeaks: nAll, validIbi: nValid, validGoodIbi: nValidGood, fromMeanIbi: nFromMeanIbi },
+    meanIbiMs, signal: { stateTransitions: transitions, goodWindowFraction: tot > 0 ? good / tot : null, coveredFraction: tot / (endMs - startMs) }
+  };
+}
+function scoreTrial(counts, reported) {
+  const s = (rec) => (rec == null ? null : schandry(rec, reported));
+  return {
+    schandry_all: s(counts.allPeaks), schandry_valid: s(counts.validIbi), schandry_meanIbi: s(counts.fromMeanIbi),
+    alt_all: counts.allPeaks > 0 ? altScore(counts.allPeaks, reported) : null
+  };
+}
+function summarize(trials) {
+  const main = trials.filter(t => !t.practice && t.reported != null);
+  const avg = key => {
+    const v = main.map(t => t.scores && t.scores[key]).filter(x => x != null);
+    return v.length ? { mean: mean(v), n: v.length } : null;
+  };
+  return { nMainTrials: main.length, schandry_all: avg('schandry_all'), schandry_valid: avg('schandry_valid'),
+           schandry_meanIbi: avg('schandry_meanIbi'), alt_all: avg('alt_all') };
+}
+//</PURE>
 
-  // ---- 画面1→2 ----
-  document.getElementById('toFingerBtn').addEventListener('click', () => {
-    show('screen-finger');
-    startPpg();
-  });
+/* ===================== 状態 ===================== */
+let ppg = null, audioCtx = null;
+let idx = 0, pid = '', covariates = {}, post = {};
+const trialRecs = [];           // 試行ごとの記録
+let curTrial = null;            // 実行中の試行
+let sigState = 'NO_FINGER', sigGood = false, sigMsg = '', sigRemain = 0;
+let deviceInfo = {}; const visEvents = []; let finalData = null;
 
-  function startPpg() {
-    if (typeof PPG === 'undefined') {
-      document.getElementById('fingerText').textContent = 'エラー: 測定ライブラリを読み込めませんでした。通信環境を確認してください。';
-      return;
-    }
-    ppg = new PPG.PPGMonitor('#ppg-container', {
-      onReady: () => { sessionStartMs = Date.now(); },
-      onQualityUpdate: (m) => updateFingerUI(m),
-      onFrame: () => { if (ppg) { try { updateFingerUI(ppg.getMetrics()); } catch (e) {} } },
-      onError: (err) => { document.getElementById('fingerText').textContent = 'エラー: ' + err.message; }
-    });
-    ppg.start();
+const $ = id => document.getElementById(id);
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); }
+
+/* 測定中の振動（ライブラリが拍ごとに鳴らす）は時間の手がかりになるため無効化 */
+try { Object.defineProperty(navigator, 'vibrate', { value: () => false, configurable: true }); } catch (e) {}
+
+document.addEventListener('visibilitychange', () => visEvents.push({ tPerfMs: performance.now(), state: document.visibilityState }));
+
+/* ===================== 画面0: 同意 ===================== */
+$('consentBody').innerHTML = CONFIG.CONSENT_HTML;
+if (QS.get('pid')) { $('pidInput').value = QS.get('pid'); }
+if (!window.isSecureContext) $('insecureWarn').style.display = 'block';
+if (/Line\/|FBAN|FBAV|Instagram|Twitter|MicroMessenger|KAKAOTALK|; wv\)/i.test(navigator.userAgent)) {
+  const w = $('inAppWarn'); w.style.display = 'block';
+  w.textContent = 'アプリ内ブラウザではカメラが使えない場合があります。このページのURLをコピーして、SafariまたはChromeで開き直してください。';
+}
+function checkConsent() { $('consentBtn').disabled = !($('consentCheck').checked && $('pidInput').value.trim()); }
+$('consentCheck').addEventListener('change', checkConsent);
+$('pidInput').addEventListener('input', checkConsent);
+checkConsent();
+$('consentBtn').addEventListener('click', () => { pid = $('pidInput').value.trim(); initAudio(); show('screen-pre'); });
+
+/* ===================== 画面1: 事前質問 ===================== */
+function radio(name) { const r = document.querySelector('input[name="' + name + '"]:checked'); return r ? r.value : null; }
+function checkPre() { $('preBtn').disabled = !(radio('posture') && radio('caffeine') && radio('exercise') && radio('quiet')); }
+document.querySelectorAll('#screen-pre input').forEach(i => i.addEventListener('change', checkPre));
+$('preBtn').addEventListener('click', () => {
+  covariates = { posture: radio('posture'), caffeine2h: radio('caffeine'), exercise1h: radio('exercise'), environment: radio('quiet') };
+  show('screen-intro');
+});
+
+/* ===================== 音 ===================== */
+function initAudio() {
+  try {
+    if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) { audioCtx = null; }
+}
+function tone(freq, atCtx, dur) {
+  if (!audioCtx) return;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, atCtx);
+  g.gain.exponentialRampToValueAtTime(0.5, atCtx + 0.01);
+  g.gain.setValueAtTime(0.5, atCtx + dur - 0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, atCtx + dur);
+  o.connect(g); g.connect(audioCtx.destination); o.start(atCtx); o.stop(atCtx + dur + 0.01);
+}
+function ctxToPerf(ctxTime) {
+  if (audioCtx.getOutputTimestamp) {
+    const ts = audioCtx.getOutputTimestamp();
+    if (ts && ts.performanceTime > 0 && ts.contextTime > 0) return ts.performanceTime + (ctxTime - ts.contextTime) * 1000;
   }
+  return performance.now() + (ctxTime - audioCtx.currentTime) * 1000;
+}
+$('soundTestBtn').addEventListener('click', () => { initAudio(); if (audioCtx) { const t = audioCtx.currentTime + 0.05; tone(880, t, 0.2); tone(1320, t + 0.5, 0.2); } });
 
-  function updateFingerUI(m) {
-    if (!m) return;
-    const box = document.getElementById('fingerIndicator');
-    const icon = document.getElementById('fingerIcon');
-    const text = document.getElementById('fingerText');
-    box.classList.remove('state-settling', 'state-measuring-poor', 'state-measuring-good');
-    const toTrialBtn = document.getElementById('toTrialBtn');
-
-    if (m.fingerState === 'SETTLING') {
-      box.classList.add('state-settling'); icon.textContent = '⏳';
-      text.textContent = '安定待ち中... そのまま動かさないでください';
-      toTrialBtn.disabled = true;
-    } else if (m.fingerState === 'MEASURING' && m.quality && m.quality.good) {
-      box.classList.add('state-measuring-good'); icon.textContent = '✅';
-      text.textContent = '良好な信号です。次へ進めます';
-      toTrialBtn.disabled = false;
-    } else if (m.fingerState === 'MEASURING') {
-      box.classList.add('state-measuring-poor'); icon.textContent = '⚠️';
-      text.textContent = '信号が不安定です: ' + (m.quality && m.quality.reason ? m.quality.reason : '');
-      toTrialBtn.disabled = true;
-    } else {
-      icon.textContent = '👆'; text.textContent = '指をカメラとフラッシュに当ててください';
-      toTrialBtn.disabled = true;
-    }
-  }
-
-  // ---- 画面2→3 ----
-  document.getElementById('toTrialBtn').addEventListener('click', () => {
-    currentTrialIndex = 0;
-    showTrialReady();
+/* ===================== 画面2→3: PPG開始 ===================== */
+const GUIDE_JA = {
+  'Cover the rear camera lens and the flash with your fingertip pad': '背面のカメラとライトを、指の腹で覆ってください',
+  'No flash on this camera: turn on the flashlight (or use a bright lamp), then cover the lens with your fingertip': 'この端末ではライトを自動で点灯できません。明るい場所で、カメラを指の腹で覆ってください',
+  'Too bright: ease off the pressure or move your finger slightly off the flash': '明るすぎます。押す力を弱めてください',
+  'Ease off the pressure a little': '押す力を少し弱めてください',
+  'Press a little more or cover the flash too': 'もう少し押すか、ライトも指で覆ってください',
+  'Flash is uncovered, slide your finger to cover it': 'ライトが覆われていません。指をずらしてライトも覆ってください',
+  'Weak pulse. Lighten your grip or warm your hand': '脈が弱いです。握る力を弱めるか、手を温めてください',
+  'Hold the phone still': 'スマートフォンを動かさないでください',
+  'Good signal - hold steady': '良好な信号です'
+};
+function guideJa(msg) {
+  if (!msg) return '指を動かさず、軽く当て直してください';
+  if (GUIDE_JA[msg]) return GUIDE_JA[msg];
+  if (msg.startsWith('Hold still')) return '安定待ち中… 動かさないでください';
+  if (msg.startsWith('Collecting')) return '脈を確認しています… そのままお待ちください';
+  if (/Too bright/.test(msg)) return '明るすぎます。押す力を弱めてください';
+  if (/irregular|Irregular|unstable|double|missed|Beats/.test(msg)) return '信号が不安定です。動かさず、押す力を少し調整してください';
+  return '指を動かさず、軽く当て直してください';
+}
+const ERR_JA = {
+  insecure_context: 'HTTPSで開いてください。', unsupported: 'このブラウザではカメラを使えません。SafariまたはChromeで開いてください。',
+  permission_denied: 'カメラの使用が許可されていません。ブラウザの設定で許可して、ページを再読み込みしてください。',
+  no_camera: 'カメラが見つかりません。', camera_busy: '他のアプリがカメラを使用中です。閉じてからやり直してください。',
+  overconstrained: 'このカメラは必要な設定に対応していません。', aborted: 'カメラが中断されました。', unknown: 'カメラを起動できませんでした。'
+};
+function updateFingerUI() {
+  const box = document.querySelectorAll('[data-fi]');
+  let cls = '', icon = '👆', text = '';
+  if (sigState === 'NO_FINGER') { text = '背面のカメラとライトを、指の腹で覆ってください'; }
+  else if (sigState === 'SETTLING') { cls = 's-settling'; icon = '⏳'; text = '安定待ち中… 動かさないでください' + (sigRemain > 0 ? '（あと約' + Math.ceil(sigRemain) + '秒）' : ''); }
+  else if (sigGood) { cls = 's-good'; icon = '✅'; text = '良好な信号です'; }
+  else { cls = 's-poor'; icon = '⚠️'; text = guideJa(sigMsg); }
+  box.forEach(b => {
+    b.classList.remove('s-settling', 's-poor', 's-good'); if (cls) b.classList.add(cls);
+    b.querySelector('.fi-icon').textContent = icon; b.querySelector('.fi-text').textContent = text;
   });
-
-  function showTrialReady() {
-    const t = TRIALS[currentTrialIndex];
-    document.getElementById('trialReadyLabel').textContent = t.label + '（' + (currentTrialIndex + 1) + ' / ' + TRIALS.length + '）';
-    document.getElementById('trialReadyText').textContent =
-      '「開始する」を押すと画面に点が表示されます。その瞬間から心拍を数え始めてください。終了の合図があるまで、点を見つめたまま数え続けてください。';
-    show('screen-trial-ready');
-  }
-
-  // ---- 画面3→4: 試行開始 ----
-  document.getElementById('startTrialBtn').addEventListener('click', () => {
-    show('screen-counting');
-    const t = TRIALS[currentTrialIndex];
-    const startMs = Date.now() - sessionStartMs;
-    setTimeout(() => {
-      const endMs = Date.now() - sessionStartMs;
-      trialWindows[currentTrialIndex] = { startMs, endMs };
-      show('screen-response');
-      document.getElementById('countInput').value = '';
-      document.getElementById('countInput').focus();
-    }, t.seconds * 1000);
+  $('toTrialBtn').disabled = !sigGood;
+  $('startTrialBtn').disabled = !sigGood;
+}
+function startPpg() {
+  if (typeof PPG === 'undefined') { setFingerError('測定ライブラリを読み込めませんでした。通信環境を確認してください。'); return; }
+  ppg = new PPG.PPGMonitor(null, {
+    video: $('ppgVideo'),
+    debug: { includeUserAgent: true },
+    onReady: (info) => { deviceInfo.torchSupported = info.torchSupported; deviceInfo.torchState = info.torchState; },
+    onState: (s) => { sigState = s.state; if (s.state !== 'MEASURING') sigGood = false; updateFingerUI(); },
+    onQualityUpdate: (m) => {
+      sigState = m.fingerState; sigGood = (m.fingerState === 'MEASURING' && !!(m.quality && m.quality.good));
+      sigMsg = m.guidanceMessage || ''; sigRemain = m.settleRemainingSec || 0; updateFingerUI();
+    },
+    onError: (err) => setFingerError(ERR_JA[err.code] || ERR_JA.unknown)
   });
+  ppg.start().catch(() => {});
+}
+function setFingerError(msg) { document.querySelectorAll('[data-fi]').forEach(b => { b.classList.remove('s-settling', 's-good'); b.classList.add('s-poor'); b.querySelector('.fi-icon').textContent = '⚠️'; b.querySelector('.fi-text').textContent = msg; }); }
+$('toFingerBtn').addEventListener('click', () => { initAudio(); show('screen-finger'); startPpg(); });
+$('toTrialBtn').addEventListener('click', () => { idx = 0; showTrialReady(); });
 
-  // ---- 画面5→6 ----
-  document.getElementById('submitCountBtn').addEventListener('click', () => {
-    const val = document.getElementById('countInput').value;
-    if (val === '' || isNaN(val)) { alert('回数を入力してください'); return; }
-    responses[currentTrialIndex] = { count: parseInt(val, 10) };
-    document.getElementById('confSlider').value = 50;
-    document.getElementById('confVal').textContent = '50';
-    show('screen-confidence');
+/* ===================== 試行 ===================== */
+function showTrialReady() {
+  const t = CONFIG.TRIALS[idx];
+  $('trialReadyLabel').textContent = t.label + '（' + (idx + 1) + ' / ' + CONFIG.TRIALS.length + '）';
+  $('trialReadyText').textContent = '指をカメラに当てたまま、「開始する」を押してください。点が表示され、音が鳴った瞬間から心拍を数え始め、終了の音と画面の変化があるまで、点を見つめたまま数え続けてください。';
+  show('screen-trial-ready'); updateFingerUI();
+}
+$('startTrialBtn').addEventListener('click', () => {
+  if (!sigGood || !ppg || ppg.startTimestampSec == null) return;
+  initAudio();
+  const t = CONFIG.TRIALS[idx];
+  show('screen-counting');
+  let startPerf, endPerf, audio = { used: false };
+  if (audioCtx) {
+    const s = audioCtx.currentTime + 0.1;
+    tone(880, s, 0.2); tone(1320, s + t.seconds, 0.2);
+    startPerf = ctxToPerf(s); endPerf = ctxToPerf(s + t.seconds);
+    audio = { used: true, state: audioCtx.state, baseLatency: audioCtx.baseLatency ?? null, outputLatency: audioCtx.outputLatency ?? null,
+              hasOutputTimestamp: !!audioCtx.getOutputTimestamp };
+  } else { startPerf = performance.now() + 100; endPerf = startPerf + t.seconds * 1000; }
+  curTrial = { index: idx, label: t.label, practice: t.practice, seconds: t.seconds, startPerfMs: startPerf, endPerfMs: endPerf, audio,
+               fingerGoodAtStart: sigGood };
+  setTimeout(() => {
+    curTrial.uiEndPerfMs = performance.now();
+    show('screen-response'); curTrial.responseShownPerfMs = performance.now();
+    $('countInput').value = ''; $('countInput').focus();
+    runHoldNote(endPerf);
+  }, Math.max(0, endPerf - performance.now()) + 60);
+});
+let holdTimer = null;
+function runHoldNote(endPerf) {
+  clearInterval(holdTimer);
+  const tick = () => {
+    const left = CONFIG.POST_TRIAL_WAIT_SEC - (performance.now() - endPerf) / 1000;
+    const msg = left > 0 ? '指はカメラに当てたままにしてください（あと約' + Math.ceil(left) + '秒）' : '指を離して構いません。次の準備ができたら、また当ててください。';
+    $('holdNote').textContent = msg; $('holdNote2').textContent = msg;
+    if (left <= -1) clearInterval(holdTimer);
+  };
+  tick(); holdTimer = setInterval(tick, 500);
+}
+$('submitCountBtn').addEventListener('click', () => {
+  const v = $('countInput').value;
+  if (v === '' || isNaN(v) || +v < 0 || +v > 300) { alert('0〜300の数字で回数を入力してください'); return; }
+  curTrial.reported = parseInt(v, 10); curTrial.responseSubmitPerfMs = performance.now();
+  $('confSlider').value = 50; $('confVal').textContent = '50'; show('screen-confidence');
+});
+$('confSlider').addEventListener('input', e => { $('confVal').textContent = e.target.value; });
+$('submitConfBtn').addEventListener('click', () => {
+  curTrial.confidence = parseInt($('confSlider').value, 10);
+  trialRecs[idx] = curTrial; idx++;
+  if (idx < CONFIG.TRIALS.length) showTrialReady(); else show('screen-post');
+});
+
+/* ===================== 事後質問・集計 ===================== */
+$('postBtn').addEventListener('click', async () => {
+  post = { strategies: Array.from(document.querySelectorAll('input[name="strategy"]:checked')).map(i => i.value),
+           restingHrGuess: $('hrGuess').value === '' ? null : parseInt($('hrGuess').value, 10) };
+  show('screen-saving');
+  const last = trialRecs[trialRecs.length - 1];
+  const waitMs = (last.endPerfMs + (CONFIG.POST_TRIAL_WAIT_SEC + 0.5) * 1000) - performance.now();
+  if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
+  finalData = buildData();
+  try { ppg.stop(); } catch (e) {}
+  const res = await sendData(finalData);
+  showDone(res);
+});
+function buildData() {
+  const log = ppg.getDebugLog(), tacho = ppg.getTachogram();
+  const baseMs = ppg.startTimestampSec * 1000;
+  const trials = trialRecs.map(r => {
+    const m = computeTrialMetrics(log.events, log.windows, tacho, baseMs, r.startPerfMs, r.endPerfMs, CONFIG.WINDOW_SEC);
+    const scores = scoreTrial(m.counts, r.reported);
+    return { ...r, startLibSec: (r.startPerfMs - baseMs) / 1000, endLibSec: (r.endPerfMs - baseMs) / 1000,
+             counts: m.counts, meanIbiMs: m.meanIbiMs, signal: m.signal, scores };
   });
-
-  document.getElementById('confSlider').addEventListener('input', (e) => {
-    document.getElementById('confVal').textContent = e.target.value;
+  if (!INCLUDE_RAW) log.samples = [];
+  return {
+    schema: 'hct-ppg-v1', appVersion: CONFIG.APP_VERSION, mode: MODE, pid, rawIncluded: INCLUDE_RAW,
+    startedAtIso: new Date().toISOString(), trialDesign: CONFIG.TRIALS,
+    page: { href: location.origin + location.pathname, userAgent: navigator.userAgent, language: navigator.language,
+            screen: { w: screen.width, h: screen.height, dpr: window.devicePixelRatio }, device: deviceInfo, audioCtxSampleRate: audioCtx ? audioCtx.sampleRate : null },
+    covariates, post, trials, summary: summarize(trials), visibilityEvents: visEvents,
+    ppgBaseMs: baseMs, tachogram: tacho, ppgLog: log
+  };
+}
+async function sendData(data) {
+  if (!CONFIG.ENDPOINT_URL) return { sent: false, reason: 'no_endpoint' };
+  try {
+    await fetch(CONFIG.ENDPOINT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+    return { sent: true };
+  } catch (e) { return { sent: false, reason: String(e) }; }
+}
+function downloadJson() {
+  const blob = new Blob([JSON.stringify(finalData)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'hct_' + (pid || 'nopid') + '_' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function showDone(res) {
+  $('doneMsg').textContent = res.sent
+    ? '課題は終了です。データは研究者に送信されました。このページを閉じて構いません。'
+    : (CONFIG.ENDPOINT_URL ? 'データの送信に失敗した可能性があります。「もう一度送信する」を押すか、「データをファイルとして保存する」で保存して、研究者に送ってください。'
+                          : '課題は終了です。下のボタンでデータを保存し、研究者の指示に従って提出してください。');
+  $('resendBtn').style.display = (!res.sent && CONFIG.ENDPOINT_URL) ? 'block' : 'none';
+  if (DEBUG) renderDebug();
+  show('screen-done');
+}
+$('resendBtn').addEventListener('click', async () => { const r = await sendData(finalData); showDone(r); });
+$('downloadBtn').addEventListener('click', downloadJson);
+function f2(x) { return x == null ? '—' : x.toFixed(2); }
+function renderDebug() {
+  $('debugCard').style.display = 'block';
+  let h = '<tr><th>試行</th><th>報告</th><th>全ピーク</th><th>有効IBI</th><th>平均IBI由来</th><th>信頼度</th><th>得点(全)</th><th>窓good</th></tr>';
+  finalData.trials.forEach(t => {
+    h += '<tr><td>' + t.label + '</td><td>' + t.reported + '</td><td>' + t.counts.allPeaks + '</td><td>' + t.counts.validIbi + '</td><td>' + f2(t.counts.fromMeanIbi) +
+         '</td><td>' + t.confidence + '</td><td>' + f2(t.scores.schandry_all) + '</td><td>' + f2(t.signal.goodWindowFraction) + '</td></tr>';
   });
-
-  // ---- 画面6→次の試行 or 結果 ----
-  document.getElementById('submitConfBtn').addEventListener('click', () => {
-    responses[currentTrialIndex].confidence = parseInt(document.getElementById('confSlider').value, 10);
-    currentTrialIndex++;
-    if (currentTrialIndex < TRIALS.length) {
-      showTrialReady();
-    } else {
-      finishSession();
-    }
-  });
-
-  // ---- 終了処理・採点 ----
-  function finishSession() {
-    let tacho = [];
-    try { tacho = ppg ? ppg.getTachogram() : []; } catch (e) { tacho = []; }
-    if (ppg) { try { ppg.stop(); } catch (e) {} }
-
-    const tbl = document.getElementById('resultsTable');
-    let html = '<tr><th>試行</th><th>報告数</th><th>実測数</th><th>信頼度</th><th>正確さ</th></tr>';
-    let accSum = 0, accN = 0;
-
-    TRIALS.forEach((t, i) => {
-      const win = trialWindows[i] || {};
-      // tachogramの各エントリのタイムスタンプ(秒)がセッション開始からの経過秒である前提で、
-      // 試行の時間窓に入る拍動をカウントする。ライブラリの実際のタイムスタンプ仕様は
-      // テスト時に必ず検証すること（wall-clockとのズレがあれば要調整）。
-      const winStartSec = (win.startMs || 0) / 1000;
-      const winEndSec = (win.endMs || 0) / 1000;
-      const beatsInWindow = tacho.filter(b => (b.t >= winStartSec && b.t <= winEndSec) && b.valid !== false);
-      const realCount = beatsInWindow.length;
-      const reported = responses[i] ? responses[i].count : null;
-      const conf = responses[i] ? responses[i].confidence : null;
-
-      let accStr = '—';
-      if (reported !== null && realCount > 0) {
-        const acc = 1 - Math.abs(realCount - reported) / ((realCount + reported) / 2);
-        accStr = acc.toFixed(2);
-        if (!t.practice) { accSum += acc; accN++; }
-      }
-
-      html += '<tr><td>' + t.label + '</td><td>' + (reported ?? '—') + '</td><td>' + realCount +
-        '</td><td>' + (conf ?? '—') + '</td><td>' + accStr + '</td></tr>';
-    });
-    tbl.innerHTML = html;
-
-    document.getElementById('overallAccuracy').textContent = accN > 0
-      ? '本番3試行の平均正確さスコア: ' + (accSum / accN).toFixed(3)
-      : '正確さスコアを算出できませんでした（実測データ不足の可能性）。';
-
-    show('screen-results');
-  }
+  $('resultsTable').innerHTML = h;
+  const s = finalData.summary;
+  $('debugNote').textContent = 'デバッグ表示（?debug=1）。本番3試行の平均 Schandry得点: 全ピーク=' + f2(s.schandry_all && s.schandry_all.mean) +
+    ' / 有効IBI=' + f2(s.schandry_valid && s.schandry_valid.mean) + ' / 平均IBI由来=' + f2(s.schandry_meanIbi && s.schandry_meanIbi.mean);
+}
 </script>
 </body>
 </html>
