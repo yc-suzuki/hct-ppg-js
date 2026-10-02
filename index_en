@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Heartbeat Counting Task (HCT)</title>
+<style>
+  :root { --bg:#f7f7f8; --card:#fff; --text:#1a1a1a; --sub:#6b7280; --accent:#2563eb; --border:#e5e7eb; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg:#111214; --card:#1c1d20; --text:#f2f2f2; --sub:#9ca3af; --border:#2d2f33; }
+  }
+  :root[data-theme="dark"] { --bg:#111214; --card:#1c1d20; --text:#f2f2f2; --sub:#9ca3af; --border:#2d2f33; }
+  * { box-sizing:border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  html, body { height:100%; }
+  body { margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px); }
+  .wrap { max-width:480px; margin:0 auto; padding:20px 16px 40px; min-height:100%; display:flex; flex-direction:column; }
+  .screen { display:none; flex:1; flex-direction:column; }
+  .screen.active { display:flex; }
+  h1 { font-size:1.1rem; margin:4px 0 14px; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:18px; margin-bottom:14px; }
+  p.inst { line-height:1.9; font-size:.95rem; margin:0 0 14px; }
+  .warn-box { background:#fef2f2; border:1px solid #fecaca; color:#991b1b; border-radius:10px; padding:12px 14px;
+    font-weight:700; font-size:.92rem; line-height:1.7; margin-bottom:14px; }
+  :root:not([data-theme="light"]) .warn-box { background:#3f1d1d; border-color:#7f1d1d; color:#fca5a5; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .warn-box { background:#fef2f2; border-color:#fecaca; color:#991b1b; } }
+  .info-box { background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; border-radius:10px; padding:12px 14px; font-size:.88rem; line-height:1.7; margin-bottom:14px; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .info-box { background:#1e2a44; border-color:#334e7a; color:#bfdbfe; } }
+  button { width:100%; padding:15px 10px; border-radius:12px; border:none; background:var(--accent); color:#fff;
+    font-size:1rem; font-weight:700; cursor:pointer; margin-top:8px; }
+  button:disabled { opacity:.4; }
+  button.secondary { background:transparent; border:1px solid var(--border); color:var(--text); }
+  .center-flex { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .fixation { font-size:3rem; color:var(--sub); user-select:none; }
+  .trial-label { text-align:center; color:var(--sub); font-size:.85rem; margin-bottom:6px; }
+  input[type=number], input[type=text] { width:100%; padding:14px; font-size:1.2rem; border-radius:10px;
+    border:1px solid var(--border); background:var(--bg); color:var(--text); margin-bottom:10px; }
+  input[type=number] { text-align:center; font-size:1.4rem; }
+  input[type=range] { width:100%; margin:18px 0 6px; }
+  .slider-labels { display:flex; justify-content:space-between; font-size:.78rem; color:var(--sub); }
+  .slider-val { text-align:center; font-size:1.6rem; font-weight:700; margin-bottom:4px; }
+  label.opt { display:flex; align-items:center; gap:10px; padding:8px 0; font-size:.95rem; line-height:1.5; }
+  label.opt input { width:20px; height:20px; flex:none; }
+  .q { font-weight:700; font-size:.92rem; margin:14px 0 4px; }
+  .fi { display:flex; align-items:center; gap:12px; padding:14px; border-radius:12px; margin-bottom:14px; background:#6b7280; transition:background-color .25s ease; }
+  .fi.s-settling { background:#d97706; } .fi.s-poor { background:#dc2626; } .fi.s-good { background:#16a34a; }
+  .fi-icon { font-size:1.8rem; line-height:1; } .fi-text { color:#fff; font-weight:700; font-size:.9rem; line-height:1.5; }
+  table.results { width:100%; border-collapse:collapse; font-size:.78rem; }
+  table.results th, table.results td { border:1px solid var(--border); padding:5px 4px; text-align:center; }
+  .note { font-size:.78rem; color:var(--sub); line-height:1.5; margin-top:10px; }
+  .hold { font-size:.85rem; font-weight:700; text-align:center; margin-bottom:10px; color:#b45309; }
+  #ppgVideo { position:fixed; width:1px; height:1px; opacity:0; pointer-events:none; left:0; top:0; }
+</style>
+</head>
+<body>
+<video id="ppgVideo" playsinline muted autoplay></video>
+<div class="wrap">
+
+  <!-- 0: Information and consent -->
+  <div class="screen active" id="screen-consent">
+    <h1>Heartbeat Counting Task</h1>
+    <div id="inAppWarn" class="warn-box" style="display:none"></div>
+    <div id="insecureWarn" class="warn-box" style="display:none">This page must be opened over HTTPS. Please contact the researcher.</div>
+    <div class="card" id="consentBody"></div>
+    <div class="card">
+      <div class="q" style="margin-top:0">Participant ID</div>
+      <input type="text" id="pidInput" placeholder="ID given by the researcher" autocomplete="off">
+      <label class="opt"><input type="checkbox" id="consentCheck"> I have read and understood the above and agree to participate.</label>
+    </div>
+    <button id="consentBtn" disabled>Agree and continue</button>
+  </div>
+
+  <!-- 1: Pre-task questions -->
+  <div class="screen" id="screen-pre">
+    <h1>A few questions first</h1>
+    <div class="card">
+      <div class="q" style="margin-top:0">Your current posture</div>
+      <label class="opt"><input type="radio" name="posture" value="seated"> Sitting (e.g., on a chair)</label>
+      <label class="opt"><input type="radio" name="posture" value="lying"> Lying down</label>
+      <label class="opt"><input type="radio" name="posture" value="other"> Other</label>
+      <div class="q">Caffeine within the last 2 hours (coffee, tea, energy drinks, etc.)</div>
+      <label class="opt"><input type="radio" name="caffeine" value="yes"> Yes</label>
+      <label class="opt"><input type="radio" name="caffeine" value="no"> No</label>
+      <div class="q">Exercise within the last hour (including light activity such as climbing stairs)</div>
+      <label class="opt"><input type="radio" name="exercise" value="yes"> Yes</label>
+      <label class="opt"><input type="radio" name="exercise" value="no"> No</label>
+      <div class="q">Your surroundings</div>
+      <label class="opt"><input type="radio" name="quiet" value="quiet"> Quiet and calm</label>
+      <label class="opt"><input type="radio" name="quiet" value="noisy"> Noisy or people coming and going</label>
+    </div>
+    <button id="preBtn" disabled>Next</button>
+  </div>
+
+  <!-- 2: Instructions.  NOTE: replace the task instruction wording below with the wording used in Suzuki, Saito, & Ohira (2026) -->
+  <div class="screen" id="screen-intro">
+    <h1>Task instructions</h1>
+    <div class="card">
+      <p class="inst">You will now perform a task in which you count your own heartbeats.<br><br>
+      When the start signal is given, keep looking at the dot on the screen and silently count your heartbeats. Start counting from "1". Do not speak aloud and do not use your fingers or any other means of counting; count silently, in your head only.<br><br>
+      When the stop signal is given, stop counting and enter the number of heartbeats you counted up to that point.</p>
+      <div class="warn-box">
+        ⚠️ Do not take your pulse (for example, at the wrist or neck), and do not look at a clock or any other time display.<br>
+        Please rely only on the heartbeat sensations that you actually feel.
+      </div>
+      <p class="inst">The start and the end will be indicated by a <b>sound</b> and a <b>change on the screen</b>. Please turn up the volume.</p>
+      <button class="secondary" id="soundTestBtn" style="margin-top:0">Check the sound</button>
+      <p class="inst" style="margin:14px 0 0;">You will first complete one practice trial, followed by three main trials.</p>
+    </div>
+    <button id="toFingerBtn">Next</button>
+  </div>
+
+  <!-- 3: Finger placement -->
+  <div class="screen" id="screen-finger">
+    <h1>Sensor setup</h1>
+    <div class="card">
+      <p class="inst">Hold the smartphone in one hand and cover the <b>rear camera and the light</b> together with the pad of your finger. A <b>light touch</b> is sufficient; do not press too hard.<br>
+      During the task, keep your finger on the camera and enter your responses with your other hand.</p>
+      <div class="fi" data-fi><div class="fi-icon">👆</div><div class="fi-text">Starting the camera...</div></div>
+    </div>
+    <button id="toTrialBtn" disabled>Next (available once the signal is stable)</button>
+  </div>
+
+  <!-- 4: Before each trial -->
+  <div class="screen" id="screen-trial-ready">
+    <div class="center-flex">
+      <div class="trial-label" id="trialReadyLabel"></div>
+      <div class="card" style="text-align:center; width:100%;">
+        <p class="inst" id="trialReadyText" style="margin-bottom:0;"></p>
+      </div>
+      <div class="fi" data-fi style="width:100%"><div class="fi-icon">👆</div><div class="fi-text"></div></div>
+      <button id="startTrialBtn" disabled>Start</button>
+    </div>
+  </div>
+
+  <!-- 5: Counting (no timing cues are displayed) -->
+  <div class="screen" id="screen-counting">
+    <div class="center-flex"><div class="fixation">●</div></div>
+  </div>
+
+  <!-- 6: Response -->
+  <div class="screen" id="screen-response">
+    <div class="center-flex" style="justify-content:flex-start; padding-top:30px;">
+      <div class="hold" id="holdNote"></div>
+      <div class="card" style="width:100%;">
+        <p class="inst">How many heartbeats did you count?</p>
+        <input type="number" id="countInput" inputmode="numeric" min="0" max="300" placeholder="Enter the number">
+        <button id="submitCountBtn">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7: Confidence -->
+  <div class="screen" id="screen-confidence">
+    <div class="center-flex" style="justify-content:flex-start; padding-top:30px;">
+      <div class="hold" id="holdNote2"></div>
+      <div class="card" style="width:100%;">
+        <p class="inst">How confident are you in that answer?</p>
+        <div class="slider-val" id="confVal">50</div>
+        <input type="range" id="confSlider" min="0" max="100" value="50">
+        <div class="slider-labels"><span>Not at all confident</span><span>Extremely confident</span></div>
+        <button id="submitConfBtn">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8: Post-task questions -->
+  <div class="screen" id="screen-post">
+    <h1>Final questions</h1>
+    <div class="card">
+      <p class="inst" style="margin-bottom:6px">Please select everything you did during the task. Please answer honestly (your answers will not affect you in any way).</p>
+      <label class="opt"><input type="checkbox" name="strategy" value="pulse_touch"> I touched my pulse (e.g., at the wrist or neck)</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="clock"> I looked at a clock or time display</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="count_seconds"> I counted seconds ("1, 2, 3...")</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="estimate_rate"> I estimated the number from my usual heart rate</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="interrupted"> I was interrupted (sounds, people, notifications, etc.)</label>
+      <label class="opt"><input type="checkbox" name="strategy" value="none"> None of the above</label>
+      <div class="q">What do you think your usual resting heart rate is, in beats per minute? (Leave blank if you do not know.)</div>
+      <input type="number" id="hrGuess" inputmode="numeric" min="20" max="250" placeholder="beats/min">
+    </div>
+    <button id="postBtn">Finish</button>
+  </div>
+
+  <!-- 9: Processing -->
+  <div class="screen" id="screen-saving">
+    <div class="center-flex"><p class="inst" style="text-align:center">Processing your data...<br>Please wait.</p></div>
+  </div>
+
+  <!-- 10: Finished -->
+  <div class="screen" id="screen-done">
+    <h1>Thank you for participating</h1>
+    <div class="card">
+      <p class="inst" id="doneMsg"></p>
+      <button id="resendBtn" style="display:none">Send again</button>
+      <button id="downloadBtn" class="secondary">Save the data as a file</button>
+    </div>
+    <div class="card" id="debugCard" style="display:none">
+      <table class="results" id="resultsTable"></table>
+      <div class="note" id="debugNote"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NOTE: pin the library version before data collection (e.g., @sontakey/ppg-js@x.y.z); otherwise the library may change during collection -->
+<script src="https://cdn.jsdelivr.net/npm/@sontakey/ppg-js/dist/index.global.js"></script>
+<script>
+/* ===================== Configuration ===================== */
+const CONFIG = {
+  APP_VERSION: 'hct-web 1.0.0-draft (English supplementary version)',
+  TRIALS: [
+    { label: 'Practice trial', seconds: 30, practice: true  },
+    { label: 'Trial 1', seconds: 25, practice: false },
+    { label: 'Trial 2', seconds: 35, practice: false },
+    { label: 'Trial 3', seconds: 45, practice: false }
+  ],
+  POST_TRIAL_WAIT_SEC: 8,     // seconds the finger must stay on the camera after a trial (beat detection lags by one analysis window)
+  WINDOW_SEC: 5,              // analysis window of the library (default 5 s)
+  ENDPOINT_URL: '',           // data endpoint (if empty, only the save button is shown), e.g., a Google Apps Script URL
+  CONSENT_HTML: '<p class="inst"><b>English version for supplementary materials.</b><br>This page is provided to document the task. The task administered to participants was the Japanese version. Do not use this page for data collection unless the English consent text has been approved by the ethics committee.</p>'
+};
+const QS = new URLSearchParams(location.search);
+const MODE = QS.get('mode') === 'lab' ? 'lab' : 'home';
+const INCLUDE_RAW = QS.get('raw') === '1' || MODE === 'lab';
+const DEBUG = QS.get('debug') === '1';
+
+/* ===================== Pure functions (unit-tested) ===================== */
+//<PURE>
+function mean(a) { return a.length ? a.reduce((s, x) => s + x, 0) / a.length : null; }
+function schandry(rec, rep) { return rec > 0 ? 1 - Math.abs(rec - rep) / rec : null; }
+function altScore(rec, rep) { return (rec + rep) > 0 ? 1 - Math.abs(rec - rep) / ((rec + rep) / 2) : null; }
+
+// events: ppg.getDebugLog().events (t in ms on the performance.now() clock)
+// windows: ppg.getDebugLog().windows (t in s since PPG start = end of the analysis window)
+// tacho: ppg.getTachogram() (t in s since PPG start)
+// baseMs: ppg.startTimestampSec*1000 (performance.now() value in ms corresponding to PPG time 0)
+function computeTrialMetrics(events, windows, tacho, baseMs, startMs, endMs, windowSec) {
+  const inWin = ms => ms >= startMs && ms < endMs;
+  const nAll = events.filter(e => e.type === 'peak' && inWin(e.t)).length;
+  const ibis = tacho.filter(b => b.valid && inWin(baseMs + b.t * 1000));
+  const nValid = ibis.length;
+  const nValidGood = ibis.filter(b => b.good).length;
+  const meanIbiMs = ibis.length >= 3 ? mean(ibis.map(b => b.ibiMs)) : null;
+  const seconds = (endMs - startMs) / 1000;
+  const nFromMeanIbi = meanIbiMs ? seconds * 1000 / meanIbiMs : null;
+  const transitions = events
+    .filter(e => e.type === 'state_transition' && inWin(e.t))
+    .map(e => ({ tRelSec: (e.t - startMs) / 1000, state: e.state, reason: e.reason }));
+  let tot = 0, good = 0;
+  for (const w of windows) {
+    const wEnd = baseMs + w.t * 1000, wStart = wEnd - windowSec * 1000;
+    const ov = Math.min(wEnd, endMs) - Math.max(wStart, startMs);
+    if (ov > 0) { tot += ov; if (w.good) good += ov; }
+  }
+  return {
+    seconds, counts: { allPeaks: nAll, validIbi: nValid, validGoodIbi: nValidGood, fromMeanIbi: nFromMeanIbi },
+    meanIbiMs, signal: { stateTransitions: transitions, goodWindowFraction: tot > 0 ? good / tot : null, coveredFraction: tot / (endMs - startMs) }
+  };
+}
+function scoreTrial(counts, reported) {
+  const s = (rec) => (rec == null ? null : schandry(rec, reported));
+  return {
+    schandry_all: s(counts.allPeaks), schandry_valid: s(counts.validIbi), schandry_meanIbi: s(counts.fromMeanIbi),
+    alt_all: counts.allPeaks > 0 ? altScore(counts.allPeaks, reported) : null
+  };
+}
+function summarize(trials) {
+  const main = trials.filter(t => !t.practice && t.reported != null);
+  const avg = key => {
+    const v = main.map(t => t.scores && t.scores[key]).filter(x => x != null);
+    return v.length ? { mean: mean(v), n: v.length } : null;
+  };
+  return { nMainTrials: main.length, schandry_all: avg('schandry_all'), schandry_valid: avg('schandry_valid'),
+           schandry_meanIbi: avg('schandry_meanIbi'), alt_all: avg('alt_all') };
+}
+//</PURE>
+
+/* ===================== State ===================== */
+let ppg = null, audioCtx = null;
+let idx = 0, pid = '', covariates = {}, post = {};
+const trialRecs = [];           // per-trial records
+let curTrial = null;            // trial in progress
+let sigState = 'NO_FINGER', sigGood = false, sigMsg = '', sigRemain = 0;
+let deviceInfo = {}; const visEvents = []; let finalData = null;
+
+const $ = id => document.getElementById(id);
+function show(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); $(id).classList.add('active'); }
+
+/* Disable vibration (the library vibrates on detected beats), since it could serve as a timing cue */
+try { Object.defineProperty(navigator, 'vibrate', { value: () => false, configurable: true }); } catch (e) {}
+
+document.addEventListener('visibilitychange', () => visEvents.push({ tPerfMs: performance.now(), state: document.visibilityState }));
+
+/* ===================== Screen 0: consent ===================== */
+$('consentBody').innerHTML = CONFIG.CONSENT_HTML;
+if (QS.get('pid')) { $('pidInput').value = QS.get('pid'); }
+if (!window.isSecureContext) $('insecureWarn').style.display = 'block';
+if (/Line\/|FBAN|FBAV|Instagram|Twitter|MicroMessenger|KAKAOTALK|; wv\)/i.test(navigator.userAgent)) {
+  const w = $('inAppWarn'); w.style.display = 'block';
+  w.textContent = 'The camera may not work in in-app browsers. Please copy this page URL and open it in Safari or Chrome.';
+}
+function checkConsent() { $('consentBtn').disabled = !($('consentCheck').checked && $('pidInput').value.trim()); }
+$('consentCheck').addEventListener('change', checkConsent);
+$('pidInput').addEventListener('input', checkConsent);
+checkConsent();
+$('consentBtn').addEventListener('click', () => { pid = $('pidInput').value.trim(); initAudio(); show('screen-pre'); });
+
+/* ===================== Screen 1: pre-task questions ===================== */
+function radio(name) { const r = document.querySelector('input[name="' + name + '"]:checked'); return r ? r.value : null; }
+function checkPre() { $('preBtn').disabled = !(radio('posture') && radio('caffeine') && radio('exercise') && radio('quiet')); }
+document.querySelectorAll('#screen-pre input').forEach(i => i.addEventListener('change', checkPre));
+$('preBtn').addEventListener('click', () => {
+  covariates = { posture: radio('posture'), caffeine2h: radio('caffeine'), exercise1h: radio('exercise'), environment: radio('quiet') };
+  show('screen-intro');
+});
+
+/* ===================== Sound ===================== */
+function initAudio() {
+  try {
+    if (!audioCtx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) audioCtx = new AC(); }
+    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+  } catch (e) { audioCtx = null; }
+}
+function tone(freq, atCtx, dur) {
+  if (!audioCtx) return;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = 'sine'; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, atCtx);
+  g.gain.exponentialRampToValueAtTime(0.5, atCtx + 0.01);
+  g.gain.setValueAtTime(0.5, atCtx + dur - 0.03);
+  g.gain.exponentialRampToValueAtTime(0.0001, atCtx + dur);
+  o.connect(g); g.connect(audioCtx.destination); o.start(atCtx); o.stop(atCtx + dur + 0.01);
+}
+function ctxToPerf(ctxTime) {
+  if (audioCtx.getOutputTimestamp) {
+    const ts = audioCtx.getOutputTimestamp();
+    if (ts && ts.performanceTime > 0 && ts.contextTime > 0) return ts.performanceTime + (ctxTime - ts.contextTime) * 1000;
+  }
+  return performance.now() + (ctxTime - audioCtx.currentTime) * 1000;
+}
+$('soundTestBtn').addEventListener('click', () => { initAudio(); if (audioCtx) { const t = audioCtx.currentTime + 0.05; tone(880, t, 0.2); tone(1320, t + 0.5, 0.2); } });
+
+/* ===================== Screens 2-3: start PPG ===================== */
+const GUIDE = {
+  'Cover the rear camera lens and the flash with your fingertip pad': 'Cover the rear camera and the light with the pad of your finger',
+  'No flash on this camera: turn on the flashlight (or use a bright lamp), then cover the lens with your fingertip': 'The light cannot be turned on automatically on this device. Use a bright place and cover the camera with the pad of your finger',
+  'Too bright: ease off the pressure or move your finger slightly off the flash': 'Too bright. Press more lightly',
+  'Ease off the pressure a little': 'Press a little more lightly',
+  'Press a little more or cover the flash too': 'Press slightly more firmly or also cover the light',
+  'Flash is uncovered, slide your finger to cover it': 'The light is not covered. Slide your finger so it also covers the light',
+  'Weak pulse. Lighten your grip or warm your hand': 'The pulse is weak. Loosen your grip or warm your hand',
+  'Hold the phone still': 'Please hold the phone still',
+  'Good signal - hold steady': 'Good signal'
+};
+function guideText(msg) {
+  if (!msg) return 'Keep your finger still, or gently re-place it';
+  if (GUIDE[msg]) return GUIDE[msg];
+  if (msg.startsWith('Hold still')) return 'Settling... please keep still';
+  if (msg.startsWith('Collecting')) return 'Checking the pulse... please wait';
+  if (/Too bright/.test(msg)) return 'Too bright. Press more lightly';
+  if (/irregular|Irregular|unstable|double|missed|Beats/.test(msg)) return 'The signal is unstable. Keep still and adjust the pressure slightly';
+  return 'Keep your finger still, or gently re-place it';
+}
+const ERR = {
+  insecure_context: 'Please open this page over HTTPS.', unsupported: 'This browser cannot use the camera. Please open the page in Safari or Chrome.',
+  permission_denied: 'Camera access was denied. Please allow it in your browser settings and reload the page.',
+  no_camera: 'No camera was found.', camera_busy: 'The camera is in use by another app. Please close it and try again.',
+  overconstrained: 'This camera does not support the required settings.', aborted: 'The camera was interrupted.', unknown: 'The camera could not be started.'
+};
+function updateFingerUI() {
+  const box = document.querySelectorAll('[data-fi]');
+  let cls = '', icon = '👆', text = '';
+  if (sigState === 'NO_FINGER') { text = 'Cover the rear camera and the light with the pad of your finger'; }
+  else if (sigState === 'SETTLING') { cls = 's-settling'; icon = '⏳'; text = 'Settling... please keep still' + (sigRemain > 0 ? ' (about ' + Math.ceil(sigRemain) + ' s left)' : ''); }
+  else if (sigGood) { cls = 's-good'; icon = '✅'; text = 'Good signal'; }
+  else { cls = 's-poor'; icon = '⚠️'; text = guideText(sigMsg); }
+  box.forEach(b => {
+    b.classList.remove('s-settling', 's-poor', 's-good'); if (cls) b.classList.add(cls);
+    b.querySelector('.fi-icon').textContent = icon; b.querySelector('.fi-text').textContent = text;
+  });
+  $('toTrialBtn').disabled = !sigGood;
+  $('startTrialBtn').disabled = !sigGood;
+}
+function startPpg() {
+  if (typeof PPG === 'undefined') { setFingerError('The measurement library could not be loaded. Please check your connection.'); return; }
+  ppg = new PPG.PPGMonitor(null, {
+    video: $('ppgVideo'),
+    debug: { includeUserAgent: true },
+    onReady: (info) => { deviceInfo.torchSupported = info.torchSupported; deviceInfo.torchState = info.torchState; },
+    onState: (s) => { sigState = s.state; if (s.state !== 'MEASURING') sigGood = false; updateFingerUI(); },
+    onQualityUpdate: (m) => {
+      sigState = m.fingerState; sigGood = (m.fingerState === 'MEASURING' && !!(m.quality && m.quality.good));
+      sigMsg = m.guidanceMessage || ''; sigRemain = m.settleRemainingSec || 0; updateFingerUI();
+    },
+    onError: (err) => setFingerError(ERR[err.code] || ERR.unknown)
+  });
+  ppg.start().catch(() => {});
+}
+function setFingerError(msg) { document.querySelectorAll('[data-fi]').forEach(b => { b.classList.remove('s-settling', 's-good'); b.classList.add('s-poor'); b.querySelector('.fi-icon').textContent = '⚠️'; b.querySelector('.fi-text').textContent = msg; }); }
+$('toFingerBtn').addEventListener('click', () => { initAudio(); show('screen-finger'); startPpg(); });
+$('toTrialBtn').addEventListener('click', () => { idx = 0; showTrialReady(); });
+
+/* ===================== Trials ===================== */
+function showTrialReady() {
+  const t = CONFIG.TRIALS[idx];
+  $('trialReadyLabel').textContent = t.label + ' (' + (idx + 1) + ' / ' + CONFIG.TRIALS.length + ')';
+  $('trialReadyText').textContent = 'Keep your finger on the camera and press "Start". Begin counting your heartbeats the moment the dot appears and the sound plays, and keep counting while looking at the dot until you hear the end sound and the screen changes.';
+  show('screen-trial-ready'); updateFingerUI();
+}
+$('startTrialBtn').addEventListener('click', () => {
+  if (!sigGood || !ppg || ppg.startTimestampSec == null) return;
+  initAudio();
+  const t = CONFIG.TRIALS[idx];
+  show('screen-counting');
+  let startPerf, endPerf, audio = { used: false };
+  if (audioCtx) {
+    const s = audioCtx.currentTime + 0.1;
+    tone(880, s, 0.2); tone(1320, s + t.seconds, 0.2);
+    startPerf = ctxToPerf(s); endPerf = ctxToPerf(s + t.seconds);
+    audio = { used: true, state: audioCtx.state, baseLatency: audioCtx.baseLatency ?? null, outputLatency: audioCtx.outputLatency ?? null,
+              hasOutputTimestamp: !!audioCtx.getOutputTimestamp };
+  } else { startPerf = performance.now() + 100; endPerf = startPerf + t.seconds * 1000; }
+  curTrial = { index: idx, label: t.label, practice: t.practice, seconds: t.seconds, startPerfMs: startPerf, endPerfMs: endPerf, audio,
+               fingerGoodAtStart: sigGood };
+  setTimeout(() => {
+    curTrial.uiEndPerfMs = performance.now();
+    show('screen-response'); curTrial.responseShownPerfMs = performance.now();
+    $('countInput').value = ''; $('countInput').focus();
+    runHoldNote(endPerf);
+  }, Math.max(0, endPerf - performance.now()) + 60);
+});
+let holdTimer = null;
+function runHoldNote(endPerf) {
+  clearInterval(holdTimer);
+  const tick = () => {
+    const left = CONFIG.POST_TRIAL_WAIT_SEC - (performance.now() - endPerf) / 1000;
+    const msg = left > 0 ? 'Keep your finger on the camera (about ' + Math.ceil(left) + ' s left)' : 'You may lift your finger now. Place it again when you are ready for the next trial.';
+    $('holdNote').textContent = msg; $('holdNote2').textContent = msg;
+    if (left <= -1) clearInterval(holdTimer);
+  };
+  tick(); holdTimer = setInterval(tick, 500);
+}
+$('submitCountBtn').addEventListener('click', () => {
+  const v = $('countInput').value;
+  if (v === '' || isNaN(v) || +v < 0 || +v > 300) { alert('Please enter a number between 0 and 300'); return; }
+  curTrial.reported = parseInt(v, 10); curTrial.responseSubmitPerfMs = performance.now();
+  $('confSlider').value = 50; $('confVal').textContent = '50'; show('screen-confidence');
+});
+$('confSlider').addEventListener('input', e => { $('confVal').textContent = e.target.value; });
+$('submitConfBtn').addEventListener('click', () => {
+  curTrial.confidence = parseInt($('confSlider').value, 10);
+  trialRecs[idx] = curTrial; idx++;
+  if (idx < CONFIG.TRIALS.length) showTrialReady(); else show('screen-post');
+});
+
+/* ===================== Post-task questions and summary ===================== */
+$('postBtn').addEventListener('click', async () => {
+  post = { strategies: Array.from(document.querySelectorAll('input[name="strategy"]:checked')).map(i => i.value),
+           restingHrGuess: $('hrGuess').value === '' ? null : parseInt($('hrGuess').value, 10) };
+  show('screen-saving');
+  const last = trialRecs[trialRecs.length - 1];
+  const waitMs = (last.endPerfMs + (CONFIG.POST_TRIAL_WAIT_SEC + 0.5) * 1000) - performance.now();
+  if (waitMs > 0) await new Promise(r => setTimeout(r, waitMs));
+  finalData = buildData();
+  try { ppg.stop(); } catch (e) {}
+  const res = await sendData(finalData);
+  showDone(res);
+});
+function buildData() {
+  const log = ppg.getDebugLog(), tacho = ppg.getTachogram();
+  const baseMs = ppg.startTimestampSec * 1000;
+  const trials = trialRecs.map(r => {
+    const m = computeTrialMetrics(log.events, log.windows, tacho, baseMs, r.startPerfMs, r.endPerfMs, CONFIG.WINDOW_SEC);
+    const scores = scoreTrial(m.counts, r.reported);
+    return { ...r, startLibSec: (r.startPerfMs - baseMs) / 1000, endLibSec: (r.endPerfMs - baseMs) / 1000,
+             counts: m.counts, meanIbiMs: m.meanIbiMs, signal: m.signal, scores };
+  });
+  if (!INCLUDE_RAW) log.samples = [];
+  return {
+    schema: 'hct-ppg-v1', appVersion: CONFIG.APP_VERSION, mode: MODE, pid, rawIncluded: INCLUDE_RAW,
+    startedAtIso: new Date().toISOString(), trialDesign: CONFIG.TRIALS,
+    page: { href: location.origin + location.pathname, userAgent: navigator.userAgent, language: navigator.language,
+            screen: { w: screen.width, h: screen.height, dpr: window.devicePixelRatio }, device: deviceInfo, audioCtxSampleRate: audioCtx ? audioCtx.sampleRate : null },
+    covariates, post, trials, summary: summarize(trials), visibilityEvents: visEvents,
+    ppgBaseMs: baseMs, tachogram: tacho, ppgLog: log
+  };
+}
+async function sendData(data) {
+  if (!CONFIG.ENDPOINT_URL) return { sent: false, reason: 'no_endpoint' };
+  try {
+    await fetch(CONFIG.ENDPOINT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(data) });
+    return { sent: true };
+  } catch (e) { return { sent: false, reason: String(e) }; }
+}
+function downloadJson() {
+  const blob = new Blob([JSON.stringify(finalData)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'hct_' + (pid || 'nopid') + '_' + new Date().toISOString().replace(/[:.]/g, '-') + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+}
+function showDone(res) {
+  $('doneMsg').textContent = res.sent
+    ? 'The task is complete. Your data have been sent to the researchers. You may close this page.'
+    : (CONFIG.ENDPOINT_URL ? 'Sending the data may have failed. Press "Send again", or save the data as a file and send it to the researchers.'
+                          : 'The task is complete. Save the data with the button below and submit it as instructed by the researchers.');
+  $('resendBtn').style.display = (!res.sent && CONFIG.ENDPOINT_URL) ? 'block' : 'none';
+  if (DEBUG) renderDebug();
+  show('screen-done');
+}
+$('resendBtn').addEventListener('click', async () => { const r = await sendData(finalData); showDone(r); });
+$('downloadBtn').addEventListener('click', downloadJson);
+function f2(x) { return x == null ? '—' : x.toFixed(2); }
+function renderDebug() {
+  $('debugCard').style.display = 'block';
+  let h = '<tr><th>Trial</th><th>Reported</th><th>All peaks</th><th>Valid IBI</th><th>From mean IBI</th><th>Confidence</th><th>Score (all)</th><th>Good windows</th></tr>';
+  finalData.trials.forEach(t => {
+    h += '<tr><td>' + t.label + '</td><td>' + t.reported + '</td><td>' + t.counts.allPeaks + '</td><td>' + t.counts.validIbi + '</td><td>' + f2(t.counts.fromMeanIbi) +
+         '</td><td>' + t.confidence + '</td><td>' + f2(t.scores.schandry_all) + '</td><td>' + f2(t.signal.goodWindowFraction) + '</td></tr>';
+  });
+  $('resultsTable').innerHTML = h;
+  const s = finalData.summary;
+  $('debugNote').textContent = 'Debug view (?debug=1). Mean Schandry score over the 3 main trials: all peaks=' + f2(s.schandry_all && s.schandry_all.mean) +
+    ' / valid IBI=' + f2(s.schandry_valid && s.schandry_valid.mean) + ' / from mean IBI=' + f2(s.schandry_meanIbi && s.schandry_meanIbi.mean);
+}
+</script>
+</body>
+</html>
